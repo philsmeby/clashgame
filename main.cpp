@@ -4,56 +4,37 @@
 class Character
 {
 private:
-	Texture2D texture;
-	Texture2D idle;
-	Texture2D run;
-	Vector2 screenPos;
-	Vector2 worldPos;
+	Texture2D texture{LoadTexture("assets/characters/knight_idle_spritesheet.png")};
+	Texture2D idle{LoadTexture("assets/characters/knight_idle_spritesheet.png")};
+	Texture2D run{"assets/characters/knight_run_spritesheet.png"};
+	Vector2 screenPos{};
+	Vector2 worldPos{};
 		// 1 is facing right, -1 is facing left
 	float rightLeft{1.0f};
 	float runningTime{};
 	int frame{};
 	const int maxFrames{6};
 	const float updateTime{1.f/12.f};
+	const float speed{4.f};
 
 public:
 	Vector2 getWorldPos(){return worldPos;}
-
+	// CPP function prototype
+	void setScreenPos(int winWidth, int winHeight);
+	void tick(float deltaTime);
 };
 
-int main()
+// scope resolution operator c++ is the ::
+void Character::setScreenPos(int winWidth, int winHeight)
 {
-	const int windowWidth{384};
-	const int windowHeight{384};
-	InitWindow(windowWidth, windowHeight, "First RPG Game!");
-
-	Texture2D map = LoadTexture("assets/maps/WorldMap.png");
-	Vector2 mapPos{0.0, 0.0};
-	float speed{4.0f};
-
-	Texture2D knight_idle = LoadTexture("assets/characters/knight_idle_spritesheet.png");
-	Texture2D knight_run = LoadTexture("assets/characters/knight_run_spritesheet.png");
-
-	Texture2D knight = knight_idle;
-	Vector2 knightPos{
-			(float)windowWidth/2.0f - 4.0f * (0.5f * (float)knight.width/6.0f),
-			(float)windowHeight/2.0f - 4.0f * (0.5f * (float)knight.height)
+	screenPos = {
+			(float)winWidth/2.0f - 4.0f * (0.5f * (float)texture.width/6.0f),
+			(float)winHeight/2.0f - 4.0f * (0.5f * (float)texture.height)
 	};
-	// 1 is facing right, -1 is facing left
-	float rightLeft{1.0f};
-	float runningTime{};
-	int frame{};
-	const int maxFrames{6};
-	const float updateTime{1.f/12.f};
+}
 
-	SetTargetFPS(60);
-
-	// Game loops
-	while (!WindowShouldClose())
-	{
-		BeginDrawing();
-		ClearBackground(WHITE);
-
+void Character::tick(float deltaTime)
+{
 		Vector2 direction{};
 		if (IsKeyDown(KEY_A)) direction.x -= 1.0;
 		if (IsKeyDown(KEY_D)) direction.x += 1.0;
@@ -63,22 +44,19 @@ int main()
 		if (Vector2Length(direction) != 0.0)
 		{
 
-			// Set mapPos = mapPos - direction
-			mapPos = Vector2Subtract(mapPos, Vector2Scale(Vector2Normalize(direction), speed));
+			// Set worldPos = worldPos + direction
+			worldPos = Vector2Add(worldPos, Vector2Scale(Vector2Normalize(direction), speed));
 			// ternary operator example in cpp
 			direction.x < 0.f ? rightLeft = -1.f : rightLeft = 1.f;
-			knight = knight_run;
+			texture = run;
 		}
 		else
 		{
-			knight = knight_idle;
+			texture = idle;
 		}
 
-		// Draw Game assets
-		DrawTextureEx(map, mapPos, 0.0, 4.0, WHITE);
-
 		// Update Animation frame
-		runningTime += GetFrameTime();
+		runningTime += deltaTime;
 		if (runningTime >= updateTime)
 		{
 			frame++;
@@ -86,13 +64,38 @@ int main()
 			if (frame > maxFrames) frame = 0;
 		}
 
-		float pawnXPos = frame * (float)knight.width/6.f;
+		float pawnXPos = frame * (float)texture.width/6.f;
+		Rectangle source{pawnXPos, 0.f, rightLeft * (float)texture.width/6.0f, (float)texture.height};
+		Rectangle dest{screenPos.x, screenPos.y, 4.0f * (float)texture.width/6.0f,  4.0f * (float)texture.height};
 
-		Rectangle source{pawnXPos, 0.f, rightLeft * (float)knight.width/6.0f, (float)knight.height};
-		Rectangle dest{knightPos.x, knightPos.y, 4.0f * (float)knight.width/6.0f,  4.0f * (float)knight.height};
+		DrawTexturePro(texture, source, dest, Vector2{}, 0.f, WHITE);
+}
 
-		DrawTexturePro(knight, source, dest, Vector2{}, 0.f, WHITE);
+int main()
+{
+	const int windowWidth{384};
+	const int windowHeight{384};
+	InitWindow(windowWidth, windowHeight, "First RPG Game!");
 
+	Texture2D map = LoadTexture("assets/maps/WorldMap.png");
+	Vector2 mapPos{0.0, 0.0};
+
+	SetTargetFPS(60);
+
+	Character knight;
+	knight.setScreenPos(windowWidth, windowHeight);
+
+	// Game loops
+	while (!WindowShouldClose())
+	{
+		BeginDrawing();
+		ClearBackground(WHITE);
+
+		mapPos = Vector2Scale(knight.getWorldPos(), -1.f);
+
+		// Draw Game assets
+		DrawTextureEx(map, mapPos, 0.0, 4.0, WHITE);
+		knight.tick(GetFrameTime());
 		EndDrawing();
 	}
 
