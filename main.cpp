@@ -28,6 +28,7 @@ int main()
 		LoadTexture("assets/characters/goblin_idle_spritesheet.png"),
 		LoadTexture("assets/characters/goblin_run_spritesheet.png")
 	};
+	goblin.setTarget(&knight);
 
 	// Game loops
 	while (!WindowShouldClose())

@@ -11,7 +11,8 @@ private:
 public:
 	Character(int winWidth, int winHeight);
 	// CPP function prototype
-	void tick(float deltaTime);
+	virtual void tick(float deltaTime) override;
+	Vector2 getScreenPos() { return screenPos; }
 };
 
 #endif
