@@ -25,11 +25,26 @@ int main()
 	};
 
 	Enemy goblin{
-		Vector2{},
+		Vector2{200.f, 400.f},
 		LoadTexture("assets/characters/goblin_idle_spritesheet.png"),
 		LoadTexture("assets/characters/goblin_run_spritesheet.png")
 	};
-	goblin.setTarget(&knight);
+
+	Enemy slime{
+		Vector2{800.f, 500.f},
+		LoadTexture("assets/characters/slime_idle_spritesheet.png"),
+		LoadTexture("assets/characters/slime_run_spritesheet.png")
+	};
+
+	Enemy* enemies[]{
+		&goblin,
+		&slime
+	};
+
+	for (auto enemy : enemies)
+	{
+		enemy->setTarget(&knight);
+	}
 
 	// Game loops
 	while (!WindowShouldClose())
@@ -79,13 +94,19 @@ int main()
 			}
 		}
 
-		goblin.tick(GetFrameTime());
+		for (auto enemy : enemies)
+		{
+			enemy->tick(GetFrameTime());
+		}
 
 		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
 		{
-			if (CheckCollisionRecs(goblin.getCollisionRec(), knight.getWeaponCollisionRec()))
+			for (auto enemy : enemies)
 			{
-				goblin.setAlive(false);
+				if (CheckCollisionRecs(enemy->getCollisionRec(), knight.getWeaponCollisionRec()))
+				{
+					enemy->setAlive(false);
+				}
 			}
 		};
 
