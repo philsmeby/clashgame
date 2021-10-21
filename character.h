@@ -7,12 +7,15 @@
 class Character : public BaseCharacter
 {
 private:
-
+	int windowWidth{};
+	int windowHeight{};
 public:
 	Character(int winWidth, int winHeight);
 	// CPP function prototype
 	virtual void tick(float deltaTime) override;
-	Vector2 getScreenPos() { return screenPos; }
+	virtual Vector2 getScreenPos() override;
+	Texture2D weapon{LoadTexture("assets/characters/weapon_sword.png")};
+	Rectangle weaponCollisionRec{};
 };
 
 #endif
