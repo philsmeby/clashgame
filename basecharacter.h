@@ -6,6 +6,7 @@
 class BaseCharacter
 {
 private:
+	bool alive{true};
 
 public:
 	BaseCharacter();
@@ -14,6 +15,8 @@ public:
 	Rectangle getCollisionRec();
 	virtual void tick(float deltaTime);
 	virtual Vector2 getScreenPos() = 0;
+	bool getAlive() { return alive; }
+	void setAlive(bool isAlive) { alive = isAlive; }
 
 protected:
 	Texture2D texture{LoadTexture("assets/characters/knight_idle_spritesheet.png")};
